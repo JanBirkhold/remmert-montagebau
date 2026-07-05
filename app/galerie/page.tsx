@@ -7,7 +7,8 @@ import {
   createBreadcrumbSchema,
   createImageObjectSchema,
 } from "@/lib/schema";
-import { galleryImages, type GalleryCategory } from "@/lib/gallery";
+import { type GalleryCategory } from "@/lib/gallery";
+import { getGalleryImages } from "@/lib/gallery-server";
 import { galerieMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = galerieMetadata;
@@ -24,6 +25,7 @@ type GaleriePageProps = {
 };
 
 export default function GaleriePage({ searchParams }: GaleriePageProps) {
+  const galleryImages = getGalleryImages();
   const kategorie = searchParams.kategorie;
   const initialCategory =
     kategorie && VALID_CATEGORIES.includes(kategorie as GalleryCategory)
@@ -50,11 +52,11 @@ export default function GaleriePage({ searchParams }: GaleriePageProps) {
               Montagebau und Innenausbau in Hessisch Oldendorf und Umgebung.
             </p>
           </div>
-          <GalleryGrid initialCategory={initialCategory} />
+          <GalleryGrid images={galleryImages} initialCategory={initialCategory} />
         </div>
       </section>
 
-      <InstagramSection />
+      <InstagramSection images={galleryImages.slice(0, 6)} />
       <ContactCTA />
     </>
   );

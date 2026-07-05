@@ -45,7 +45,7 @@ export function Header() {
             aria-label="Remmert Montagebau – Startseite"
           >
             <Image
-              src="/images/Logo.jpg"
+              src="/images/gallery/Logo.jpg"
               alt="Remmert Montagebau Logo"
               width={160}
               height={48}

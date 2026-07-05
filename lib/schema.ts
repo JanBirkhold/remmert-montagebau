@@ -1,5 +1,5 @@
 import { SITE } from "./constants";
-import { getFullAddress } from "./gallery";
+import { GALLERY_PUBLIC_PATH, getFullAddress } from "./gallery";
 
 type SchemaGraph = Record<string, unknown>[];
 
@@ -11,7 +11,7 @@ function organizationSchema() {
     url: SITE.url,
     logo: {
       "@type": "ImageObject",
-      url: `${SITE.url}/images/Logo.jpg`,
+      url: `${SITE.url}${GALLERY_PUBLIC_PATH}/Logo.jpg`,
     },
     sameAs: [SITE.instagram, SITE.facebook],
     contactPoint: {
@@ -33,7 +33,7 @@ function localBusinessSchema() {
     url: SITE.url,
     telephone: SITE.phoneRaw,
     email: SITE.email,
-    image: `${SITE.url}/images/Jan_Remmert_028-1920w.webp`,
+    image: `${SITE.url}${GALLERY_PUBLIC_PATH}/montagebau-jan-remmert-028-1920w.webp`,
     address: {
       "@type": "PostalAddress",
       streetAddress: SITE.address.street,
@@ -51,6 +51,20 @@ function localBusinessSchema() {
       name: area,
     })),
     priceRange: "$$",
+    openingHoursSpecification: [
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+        ],
+        opens: "07:30",
+        closes: "18:00",
+      },
+    ],
     sameAs: [SITE.instagram, SITE.facebook],
     founder: {
       "@type": "Person",

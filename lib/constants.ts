@@ -28,13 +28,33 @@ export const SITE = {
     "Bad Münder",
     "Bückeburg",
     "Stadthagen",
+    "Minden",
+    "Lemgo",
+    "Bad Oeynhausen",
+    "Schaumburg",
+    "Weserbergland",
+  ],
+  tagline:
+    "Ihr regionaler Fachbetrieb für Terrassenüberdachungen, Kaltwintergärten und Montagebau im Raum Hessisch Oldendorf, Hameln, Schaumburg, Rinteln und Minden.",
+  openingHours: [
+    { label: "Montag – Freitag", value: "07:30 – 18:00 Uhr" },
+    { label: "Samstag", value: "Nach Vereinbarung" },
+    { label: "Sonntag", value: "Geschlossen" },
+  ],
+  footerHighlights: [
+    "Persönliche Beratung durch den Inhaber",
+    "Kostenlose Erstberatung vor Ort",
+    "Termingerechte Projektabwicklung",
+    "Hochwertige Materialien & saubere Montage",
   ],
 } as const;
 
 export const NAV_ITEMS = [
   { href: "/", label: "Home" },
   { href: "/terrassenueberdachungen", label: "Terrassenüberdachungen" },
-  { href: "/galerie", label: "Galerie" },
+  { href: "/leistungen", label: "Leistungen" },
+  { href: "/galerie", label: "Referenzen" },
+  { href: "/faq", label: "FAQ" },
   { href: "/ueber-uns", label: "Über Uns" },
   { href: "/kontakt", label: "Kontakt" },
 ] as const;

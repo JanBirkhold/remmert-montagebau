@@ -13,17 +13,18 @@ import {
   GALLERY_CATEGORIES,
   type GalleryCategory,
   type GalleryImage,
-  galleryImages,
 } from "@/lib/gallery";
 import { cn } from "@/lib/utils";
 
 type GalleryGridProps = {
+  images: GalleryImage[];
   initialCategory?: GalleryCategory | "all";
   showFilters?: boolean;
   limit?: number;
 };
 
 export function GalleryGrid({
+  images,
   initialCategory = "all",
   showFilters = true,
   limit,
@@ -35,8 +36,8 @@ export function GalleryGrid({
 
   const filtered =
     activeCategory === "all"
-      ? galleryImages
-      : galleryImages.filter((img) => img.category === activeCategory);
+      ? images
+      : images.filter((img) => img.category === activeCategory);
 
   const displayed = limit ? filtered.slice(0, limit) : filtered;
 
@@ -128,7 +129,11 @@ export function GalleryGrid({
   );
 }
 
-export function GalleryPreview() {
+type GalleryPreviewProps = {
+  images: GalleryImage[];
+};
+
+export function GalleryPreview({ images }: GalleryPreviewProps) {
   return (
     <section className="section-padding" aria-labelledby="gallery-preview-heading">
       <div className="container-narrow">
@@ -152,7 +157,7 @@ export function GalleryPreview() {
             Alle Projekte ansehen →
           </Link>
         </div>
-        <GalleryGrid showFilters={false} limit={6} />
+        <GalleryGrid images={images} showFilters={false} limit={6} />
       </div>
     </section>
   );

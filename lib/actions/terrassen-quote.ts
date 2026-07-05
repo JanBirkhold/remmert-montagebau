@@ -1,0 +1,241 @@
+"use server";
+
+import { calculateQuote, type QuoteBreakdown } from "@/lib/quote/calculate";
+import {
+  FLOOR_LEVELS,
+  GLAZING_OPTIONS,
+  MOUNTING_TYPES,
+  QUOTE_EXTRAS,
+  ROOF_SHAPES,
+  ROOF_TYPES,
+  type FloorLevelId,
+  type GlazingId,
+  type MountingTypeId,
+  type QuoteExtraId,
+  type RoofShapeId,
+  type RoofTypeId,
+} from "@/lib/quote/config";
+import { sendQuoteEmails } from "@/lib/quote/email";
+import { generateQuotePdf, type QuoteCustomer } from "@/lib/quote/pdf";
+
+export type QuoteFormState = {
+  success: boolean;
+  message: string;
+  pdfBase64?: string;
+  pdfFilename?: string;
+  emailSent?: boolean;
+  quote?: QuoteBreakdown;
+  errors?: Record<string, string[]>;
+};
+
+function parseNumber(value: FormDataEntryValue | null, field: string) {
+  const parsed = Number(value?.toString().replace(",", "."));
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return { error: `${field} muss größer als 0 sein.` };
+  }
+  return { value: parsed };
+}
+
+function parseOptionalNumber(value: FormDataEntryValue | null) {
+  const raw = value?.toString().trim();
+  if (!raw) return { value: undefined };
+  const parsed = Number(raw.replace(",", "."));
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return { error: "Firsthöhe muss größer als 0 sein." };
+  }
+  return { value: parsed };
+}
+
+function parseQuoteInput(formData: FormData) {
+  const errors: Record<string, string[]> = {};
+
+  const roofTypeId = formData.get("roofTypeId")?.toString() as RoofTypeId;
+  const mountingTypeId = formData.get("mountingTypeId")?.toString() as MountingTypeId;
+  const roofShapeId = formData.get("roofShapeId")?.toString() as RoofShapeId;
+  const glazingId = formData.get("glazingId")?.toString() as GlazingId;
+  const floorLevelId = formData.get("floorLevelId")?.toString() as FloorLevelId;
+
+  if (!ROOF_TYPES.some((type) => type.id === roofTypeId)) {
+    errors.roofTypeId = ["Bitte wählen Sie einen Terrassentyp."];
+  }
+  if (!MOUNTING_TYPES.some((type) => type.id === mountingTypeId)) {
+    errors.mountingTypeId = ["Bitte wählen Sie die Montageart."];
+  }
+  if (!ROOF_SHAPES.some((shape) => shape.id === roofShapeId)) {
+    errors.roofShapeId = ["Bitte wählen Sie eine Dachform."];
+  }
+  if (!GLAZING_OPTIONS.some((option) => option.id === glazingId)) {
+    errors.glazingId = ["Bitte wählen Sie eine Verglasung."];
+  }
+  if (!FLOOR_LEVELS.some((level) => level.id === floorLevelId)) {
+    errors.floorLevelId = ["Bitte wählen Sie das Geschoss."];
+  }
+
+  const width = parseNumber(formData.get("widthM"), "Breite");
+  if ("error" in width && width.error) errors.widthM = [width.error];
+  const depth = parseNumber(formData.get("depthM"), "Tiefe");
+  if ("error" in depth && depth.error) errors.depthM = [depth.error];
+  const height = parseOptionalNumber(formData.get("heightM"));
+  if ("error" in height && height.error) errors.heightM = [height.error];
+
+  const extras = formData
+    .getAll("extras")
+    .map((value) => value.toString())
+    .filter((id): id is QuoteExtraId =>
+      QUOTE_EXTRAS.some((extra) => extra.id === id),
+    );
+
+  return {
+    errors,
+    input:
+      Object.keys(errors).length === 0 &&
+      !("error" in width) &&
+      !("error" in depth) &&
+      !("error" in height)
+        ? {
+            roofTypeId,
+            mountingTypeId,
+            roofShapeId,
+            glazingId,
+            floorLevelId,
+            widthM: width.value!,
+            depthM: depth.value!,
+            heightM: height.value,
+            extras,
+          }
+        : null,
+  };
+}
+
+function validateQuoteForm(formData: FormData, requireConsent: boolean) {
+  const errors: Record<string, string[]> = {};
+  const parsed = parseQuoteInput(formData);
+  Object.assign(errors, parsed.errors);
+
+  const name = formData.get("name")?.toString().trim();
+  const email = formData.get("email")?.toString().trim();
+  const phone = formData.get("phone")?.toString().trim();
+  const location = formData.get("location")?.toString().trim();
+  const message = formData.get("message")?.toString().trim();
+  const consent = formData.get("consent");
+
+  if (!name || name.length < 2) errors.name = ["Bitte geben Sie Ihren Namen an."];
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errors.email = ["Bitte geben Sie eine gültige E-Mail-Adresse an."];
+  }
+  if (!phone || phone.length < 6) errors.phone = ["Bitte geben Sie eine Telefonnummer an."];
+  if (!location || location.length < 2) errors.location = ["Bitte geben Sie Ihren Ort an."];
+  if (requireConsent && !consent) {
+    errors.consent = ["Bitte bestätigen Sie die Einwilligung zur Angebotserstellung."];
+  }
+
+  if (Object.keys(errors).length > 0 || !parsed.input) {
+    return { errors };
+  }
+
+  const quote = calculateQuote(parsed.input);
+  if (!quote) return { errors: { roofTypeId: ["Ungültige Projektdaten."] } };
+
+  const customer: QuoteCustomer = {
+    name: name!,
+    email: email!,
+    phone: phone!,
+    location: location!,
+    message: message || undefined,
+  };
+
+  return { quote, customer };
+}
+
+async function collectImageAttachments(formData: FormData) {
+  const files = formData.getAll("images").filter((entry) => entry instanceof File);
+  const attachments: { filename: string; content: Buffer }[] = [];
+
+  for (const file of files) {
+    if (!(file instanceof File) || file.size === 0) continue;
+    if (!file.type.startsWith("image/")) continue;
+    if (file.size > 5 * 1024 * 1024) continue;
+
+    attachments.push({
+      filename: file.name,
+      content: Buffer.from(await file.arrayBuffer()),
+    });
+  }
+
+  return attachments;
+}
+
+export async function submitTerrassenQuote(
+  _prevState: QuoteFormState,
+  formData: FormData,
+): Promise<QuoteFormState> {
+  const validated = validateQuoteForm(formData, true);
+  if ("errors" in validated && validated.errors) {
+    return {
+      success: false,
+      message: "Bitte prüfen Sie Ihre Eingaben.",
+      errors: validated.errors,
+    };
+  }
+
+  const { quote, customer } = validated as {
+    quote: QuoteBreakdown;
+    customer: QuoteCustomer;
+  };
+
+  const pdfBuffer = await generateQuotePdf(quote, customer);
+  const emailResult = await sendQuoteEmails(
+    quote,
+    customer,
+    pdfBuffer,
+    await collectImageAttachments(formData),
+  );
+
+  return {
+    success: true,
+    message: emailResult.sent
+      ? "Vielen Dank! Ihr unverbindliches Angebot wurde erstellt und per E-Mail an Sie gesendet. Sie können es zusätzlich hier herunterladen."
+      : "Vielen Dank! Ihr unverbindliches Angebot wurde erstellt. Laden Sie es hier herunter – der E-Mail-Versand wird nach SMTP-Konfiguration aktiviert.",
+    pdfBase64: Buffer.from(pdfBuffer).toString("base64"),
+    pdfFilename: `${quote.quoteNumber}.pdf`,
+    emailSent: emailResult.sent,
+    quote,
+  };
+}
+
+export async function previewTerrassenQuotePdf(
+  formData: FormData,
+): Promise<QuoteFormState> {
+  const parsed = parseQuoteInput(formData);
+  if (Object.keys(parsed.errors).length > 0 || !parsed.input) {
+    return {
+      success: false,
+      message: "Bitte füllen Sie zuerst Typ, Montage und Abmessungen aus.",
+      errors: parsed.errors,
+    };
+  }
+
+  const quote = calculateQuote(parsed.input);
+  if (!quote) {
+    return { success: false, message: "Angebot konnte nicht berechnet werden." };
+  }
+
+  const customer: QuoteCustomer = {
+    name: formData.get("name")?.toString().trim() || "Musterkunde (Vorschau)",
+    email: formData.get("email")?.toString().trim() || "vorschau@example.com",
+    phone: formData.get("phone")?.toString().trim() || "—",
+    location: formData.get("location")?.toString().trim() || "—",
+    message: "Test-Vorschau – unverbindlich",
+  };
+
+  const pdfBuffer = await generateQuotePdf(quote, customer);
+
+  return {
+    success: true,
+    message:
+      "Test-PDF erstellt. Das finale Angebot erhalten Sie nach Absenden per E-Mail.",
+    pdfBase64: Buffer.from(pdfBuffer).toString("base64"),
+    pdfFilename: `Test-${quote.quoteNumber}.pdf`,
+    quote,
+  };
+}

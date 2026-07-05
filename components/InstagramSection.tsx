@@ -5,10 +5,14 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { instagramImages } from "@/lib/gallery";
+import type { GalleryImage } from "@/lib/gallery";
 import { SITE } from "@/lib/constants";
 
-export function InstagramSection() {
+type InstagramSectionProps = {
+  images: GalleryImage[];
+};
+
+export function InstagramSection({ images }: InstagramSectionProps) {
   return (
     <section
       className="section-padding bg-muted/50"
@@ -29,7 +33,7 @@ export function InstagramSection() {
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:gap-4">
-          {instagramImages.map((image, index) => (
+          {images.map((image, index) => (
             <motion.div
               key={image.src}
               initial={{ opacity: 0, scale: 0.95 }}

@@ -14,6 +14,15 @@ export type GalleryImage = {
   height: number;
 };
 
+export const GALLERY_PUBLIC_PATH = "/images/gallery";
+
+export const GALLERY_CATEGORY_PREFIXES: GalleryCategory[] = [
+  "terrassenueberdachungen",
+  "carports",
+  "innenausbau",
+  "montagebau",
+];
+
 export const GALLERY_CATEGORIES: {
   id: GalleryCategory | "all";
   label: string;
@@ -25,83 +34,66 @@ export const GALLERY_CATEGORIES: {
   { id: "montagebau", label: "Montagebau" },
 ];
 
-export const galleryImages: GalleryImage[] = [
-  {
-    src: "/images/terra+hx-1920w.webp",
-    alt: "Terrassenüberdachung in Hessisch Oldendorf von Remmert Montagebau",
-    category: "terrassenueberdachungen",
-    width: 1920,
-    height: 1280,
-  },
-  {
-    src: "/images/terrrrraaaa-1920w.webp",
-    alt: "Terrassenüberdachung mit Glasdach von Remmert Montagebau in Hameln-Pyrmont",
-    category: "terrassenueberdachungen",
-    width: 1920,
-    height: 1280,
-  },
-  {
-    src: "/images/terrrrrrr-1920w.jpg",
-    alt: "Individuelle Terrassenüberdachung aus Aluminium und Glas",
-    category: "terrassenueberdachungen",
-    width: 1920,
-    height: 1280,
-  },
-  {
-    src: "/images/Jan_Remmert_028-1920w.webp",
-    alt: "Montagebau Projekt von Remmert Montagebau in der Region Hameln-Pyrmont",
-    category: "montagebau",
-    width: 1920,
-    height: 1280,
-  },
-  {
-    src: "/images/Jan_Remmert_042-1920w.webp",
-    alt: "Präzise Montagearbeiten von Remmert Montagebau in Hessisch Oldendorf",
-    category: "montagebau",
-    width: 1920,
-    height: 1280,
-  },
-  {
-    src: "/images/Jan_Remmert_059-1920w.webp",
-    alt: "Hochwertiger Innenausbau von Remmert Montagebau",
-    category: "innenausbau",
-    width: 1920,
-    height: 1280,
-  },
-  {
-    src: "/images/Jan_Remmert_061-1920w.webp",
-    alt: "Moderner Innenausbau – Remmert Montagebau Referenzprojekt",
-    category: "innenausbau",
-    width: 1920,
-    height: 1280,
-  },
-  {
-    src: "/images/zaun+kl-1920w.jpg",
-    alt: "Carport und Zaunanlage von Remmert Montagebau in Rinteln",
-    category: "carports",
-    width: 1920,
-    height: 1280,
-  },
-  {
-    src: "/images/zaun-1920w.webp",
-    alt: "Carport-Lösung und Außenanlage von Remmert Montagebau",
-    category: "carports",
-    width: 1920,
-    height: 1280,
-  },
-];
+const DEFAULT_DIMENSIONS = { width: 1920, height: 1280 };
 
-export function getGalleryByCategory(category: GalleryCategory | "all") {
-  if (category === "all") return galleryImages;
-  return galleryImages.filter((img) => img.category === category);
+export const GALLERY_IMAGE_ALT: Record<string, string> = {
+  "terrassenueberdachungen-terra-hx-1920w.webp":
+    "Terrassenüberdachung in Hessisch Oldendorf von Remmert Montagebau",
+  "terrassenueberdachungen-glasdach-1920w.webp":
+    "Terrassenüberdachung mit Glasdach von Remmert Montagebau in Hameln-Pyrmont",
+  "terrassenueberdachungen-aluminium-glas-1920w.jpg":
+    "Individuelle Terrassenüberdachung aus Aluminium und Glas",
+  "terrassenueberdachungen-aussenbereich-1920w.webp":
+    "Terrassenüberdachung und Außenbereich – Referenzprojekt von Remmert Montagebau",
+  "terrassenueberdachungen-jan-remmert-059-1920w.webp":
+    "Terrassenüberdachung in Hessisch Oldendorf – Referenzprojekt von Remmert Montagebau",
+  "montagebau-jan-remmert-028-1920w.webp":
+    "Montagebau Projekt von Remmert Montagebau in der Region Hameln-Pyrmont",
+  "montagebau-jan-remmert-042-1920w.webp":
+    "Präzise Montagearbeiten von Remmert Montagebau in Hessisch Oldendorf",
+  "montagebau-gartenhaus-holzfassade-1920w.webp":
+    "Individueller Gartenbau mit Holzfassade und Rundfenstern – Remmert Montagebau",
+  "montagebau-holzdeck-naturteich-1920w.webp":
+    "Holzterrassendeck am Naturteich – Außenprojekt von Remmert Montagebau",
+  "innenausbau-jan-remmert-061-1920w.webp":
+    "Moderner Innenausbau – Remmert Montagebau Referenzprojekt",
+  "innenausbau-badausbau-waschtisch-1920w.webp":
+    "Hochwertiger Badausbau mit modernem Waschtisch und Beleuchtung von Remmert Montagebau",
+  "carports-zaunanlage-1920w.jpg":
+    "Carport und Zaunanlage von Remmert Montagebau in Rinteln",
+  "carports-carport-aussenanlage-1920w.webp":
+    "Carport-Lösung und Außenanlage von Remmert Montagebau",
+};
+
+export const GALLERY_EXCLUDED_FILES = new Set(["Logo.jpg", ".DS_Store"]);
+
+export const TERRASSEN_HERO_IMAGE = {
+  src: `${GALLERY_PUBLIC_PATH}/terrassenueberdachungen-jan-remmert-059-1920w.webp`,
+  alt: GALLERY_IMAGE_ALT["terrassenueberdachungen-jan-remmert-059-1920w.webp"],
+};
+
+export function parseCategoryFromFilename(
+  filename: string,
+): GalleryCategory | null {
+  return (
+    GALLERY_CATEGORY_PREFIXES.find((category) =>
+      filename.startsWith(`${category}-`),
+    ) ?? null
+  );
+}
+
+export function getGalleryByCategory(
+  images: GalleryImage[],
+  category: GalleryCategory | "all",
+) {
+  if (category === "all") return images;
+  return images.filter((img) => img.category === category);
 }
 
 export const heroImage = {
-  src: "/images/Jan_Remmert_028-1920w.webp",
+  src: `${GALLERY_PUBLIC_PATH}/montagebau-jan-remmert-028-1920w.webp`,
   alt: "Terrassenüberdachung und Montagebau von Remmert Montagebau in Hessisch Oldendorf",
 };
-
-export const instagramImages = galleryImages.slice(0, 6);
 
 export const PLACEHOLDER_REVIEWS = [
   {
@@ -135,28 +127,28 @@ export const SERVICES = [
     description:
       "Maßgeschneiderte Überdachungen aus Aluminium, Stahl und Glas für mehr Wohnqualität im Außenbereich.",
     href: "/terrassenueberdachungen",
-    image: "/images/terra+hx-1920w.webp",
+    image: `${GALLERY_PUBLIC_PATH}/terrassenueberdachungen-jan-remmert-059-1920w.webp`,
   },
   {
     title: "Carports",
     description:
       "Stabile, langlebige und optisch passende Carport-Lösungen für Ihr Zuhause.",
     href: "/galerie?kategorie=carports",
-    image: "/images/zaun-1920w.webp",
+    image: `${GALLERY_PUBLIC_PATH}/carports-carport-aussenanlage-1920w.webp`,
   },
   {
     title: "Montagebau",
     description:
       "Präzise Montagearbeiten mit Erfahrung, sauberer Ausführung und zuverlässiger Projektabwicklung.",
     href: "/galerie?kategorie=montagebau",
-    image: "/images/Jan_Remmert_042-1920w.webp",
+    image: `${GALLERY_PUBLIC_PATH}/montagebau-jan-remmert-042-1920w.webp`,
   },
   {
     title: "Moderner Innenausbau",
     description:
       "Funktionale und hochwertige Innenraumlösungen für private und gewerbliche Anforderungen.",
     href: "/galerie?kategorie=innenausbau",
-    image: "/images/Jan_Remmert_059-1920w.webp",
+    image: `${GALLERY_PUBLIC_PATH}/innenausbau-jan-remmert-061-1920w.webp`,
   },
 ] as const;
 
@@ -170,4 +162,30 @@ export const WHY_US = [
 
 export function getFullAddress() {
   return `${SITE.address.street}, ${SITE.address.postalCode} ${SITE.address.city}, ${SITE.address.country}`;
+}
+
+function buildFallbackAlt(filename: string): string {
+  const withoutSize = filename.replace(/-1920w\.(webp|jpe?g|png)$/i, "");
+  const withoutCategory =
+    GALLERY_CATEGORY_PREFIXES.reduce(
+      (name, category) =>
+        name.startsWith(`${category}-`)
+          ? name.slice(category.length + 1)
+          : name,
+      withoutSize,
+    ) ?? withoutSize;
+
+  return `Referenzprojekt von Remmert Montagebau – ${withoutCategory.replace(/-/g, " ")}`;
+}
+
+export function resolveGalleryImageMeta(filename: string): GalleryImage {
+  const category = parseCategoryFromFilename(filename) ?? "montagebau";
+
+  return {
+    src: `${GALLERY_PUBLIC_PATH}/${filename}`,
+    alt: GALLERY_IMAGE_ALT[filename] ?? buildFallbackAlt(filename),
+    category,
+    width: DEFAULT_DIMENSIONS.width,
+    height: DEFAULT_DIMENSIONS.height,
+  };
 }

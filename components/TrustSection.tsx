@@ -1,73 +1,72 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Shield, Clock, MessageSquare, MapPin } from "lucide-react";
+import { Award, CalendarCheck, Headset } from "lucide-react";
 
-const TRUST_ITEMS = [
+const PROMISE_ITEMS = [
   {
-    icon: Shield,
-    title: "Qualität & Sicherheit",
+    icon: Headset,
+    title: "Fortlaufender Kundendienst",
     description:
-      "Hochwertige Materialien und präzise Ausführung für langlebige Ergebnisse.",
+      "Vom ersten Gespräch bis zur finalen Abnahme sind wir für Sie da – mit festem Ansprechpartner, kurzen Wegen und Rückmeldungen, auf die Sie sich verlassen können.",
   },
   {
-    icon: MapPin,
-    title: "Regional verwurzelt",
+    icon: CalendarCheck,
+    title: "Termingerechte Fertigstellung",
     description:
-      "Persönliche Betreuung in Hessisch Oldendorf, Hameln, Rinteln und Umgebung.",
+      "Wir planen realistisch, kommunizieren klare Meilensteine und halten unsere Zusagen ein – damit Ihr Projekt pünktlich und ohne unnötige Verzögerungen fertig wird.",
   },
   {
-    icon: Clock,
-    title: "Zuverlässige Umsetzung",
+    icon: Award,
+    title: "Beste Qualität",
     description:
-      "Termintreue Planung und saubere Montage – vom Erstkontakt bis zur Fertigstellung.",
+      "Erstklassige Materialien, präzise Handwerksarbeit und ein Ergebnis, das in Form, Funktion und Langlebigkeit überzeugt – gebaut, um Jahrzehnte zu bestehen.",
   },
-  {
-    icon: MessageSquare,
-    title: "Ehrliche Beratung",
-    description:
-      "Transparente Kommunikation und realistische Einschätzungen für Ihr Projekt.",
-  },
-];
+] as const;
 
 export function TrustSection() {
   return (
     <section
-      className="section-padding"
-      aria-labelledby="trust-heading"
+      className="section-padding bg-muted/40"
+      aria-labelledby="promise-heading"
     >
       <div className="container-narrow">
         <div className="mx-auto mb-12 max-w-2xl text-center">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">
+            Unser Versprechen
+          </p>
           <h2
-            id="trust-heading"
-            className="text-3xl font-bold text-foreground sm:text-4xl"
+            id="promise-heading"
+            className="mt-3 text-3xl font-bold text-foreground sm:text-4xl"
           >
-            Warum Kunden uns vertrauen
+            Unser Versprechen an Sie
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Handwerk, das überzeugt – durch Qualität, Nähe und verlässliche
-            Zusammenarbeit.
+          <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
+            Was wir Ihnen zusagen, setzen wir auch um – verbindlich, transparent
+            und mit dem Anspruch, den wir an unsere eigene Arbeit stellen.
           </p>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {TRUST_ITEMS.map((item, index) => (
-            <motion.div
+        <div className="grid gap-6 lg:grid-cols-3">
+          {PROMISE_ITEMS.map((item, index) => (
+            <motion.article
               key={item.title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="rounded-2xl border border-border bg-card p-6 shadow-sm"
+              className="rounded-2xl border border-border bg-card p-8 shadow-sm"
             >
-              <div className="mb-4 inline-flex rounded-xl bg-primary/10 p-3 text-primary">
+              <div className="mb-5 inline-flex rounded-xl bg-primary/10 p-3 text-primary">
                 <item.icon className="h-6 w-6" aria-hidden="true" />
               </div>
-              <h3 className="text-lg font-semibold">{item.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              <h3 className="text-xl font-semibold text-foreground">
+                {item.title}
+              </h3>
+              <p className="mt-3 text-base leading-relaxed text-muted-foreground">
                 {item.description}
               </p>
-            </motion.div>
+            </motion.article>
           ))}
         </div>
       </div>

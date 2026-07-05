@@ -7,8 +7,11 @@ import { GalleryPreview } from "@/components/GalleryGrid";
 import { InstagramSection } from "@/components/InstagramSection";
 import { ContactCTA } from "@/components/ContactCTA";
 import { TrustSection } from "@/components/TrustSection";
+import { getGalleryImages } from "@/lib/gallery-server";
 
 export default function HomePage() {
+  const galleryImages = getGalleryImages();
+
   return (
     <>
       <Hero />
@@ -16,9 +19,9 @@ export default function HomePage() {
       <CommunicationSection />
       <ReviewSection />
       <AboutPreview />
-      <GalleryPreview />
+      <GalleryPreview images={galleryImages} />
       <TrustSection />
-      <InstagramSection />
+      <InstagramSection images={galleryImages.slice(0, 6)} />
       <ContactCTA />
     </>
   );

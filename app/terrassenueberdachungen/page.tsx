@@ -2,16 +2,21 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { JsonLd } from "@/components/JsonLd";
 import { TerrassenSeoContent } from "@/components/TerrassenSeoContent";
+import { TerrassenQuoteConfigurator } from "@/components/TerrassenQuoteConfigurator";
 import { FaqSection } from "@/components/FaqSection";
 import { ContactCTA } from "@/components/ContactCTA";
 import { GalleryGrid } from "@/components/GalleryGrid";
 import { createBreadcrumbSchema, createFaqSchema } from "@/lib/schema";
 import { TERRASSEN_FAQ } from "@/lib/content/terrassen";
+import { TERRASSEN_HERO_IMAGE } from "@/lib/gallery";
+import { getGalleryImages } from "@/lib/gallery-server";
 import { terrassenMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = terrassenMetadata;
 
 export default function TerrassenPage() {
+  const galleryImages = getGalleryImages();
+
   return (
     <>
       <JsonLd
@@ -25,8 +30,8 @@ export default function TerrassenPage() {
       <section className="relative overflow-hidden pt-20">
         <div className="absolute inset-0">
           <Image
-            src="/images/terra+hx-1920w.webp"
-            alt="Terrassenüberdachung in Hessisch Oldendorf von Remmert Montagebau"
+            src={TERRASSEN_HERO_IMAGE.src}
+            alt={TERRASSEN_HERO_IMAGE.alt}
             fill
             priority
             sizes="100vw"
@@ -42,6 +47,12 @@ export default function TerrassenPage() {
             Individuelle Lösungen aus Aluminium, Stahl und Glas – geplant und
             montiert von Remmert Montagebau.
           </p>
+          <a
+            href="#angebot"
+            className="mt-8 inline-flex rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Unverbindliches Angebot konfigurieren
+          </a>
         </div>
       </section>
 
@@ -51,12 +62,19 @@ export default function TerrassenPage() {
         </div>
       </section>
 
+      <section className="section-padding bg-muted/40" id="angebot">
+        <div className="container-narrow">
+          <TerrassenQuoteConfigurator />
+        </div>
+      </section>
+
       <section className="section-padding bg-muted/50">
         <div className="container-narrow">
           <h2 className="mb-8 text-center text-2xl font-bold">
             Referenzprojekte
           </h2>
           <GalleryGrid
+            images={galleryImages}
             initialCategory="terrassenueberdachungen"
             showFilters={false}
           />

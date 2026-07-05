@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TRUST_BADGES, heroImage } from "@/lib/gallery";
+import { SITE } from "@/lib/constants";
 
 export function Hero() {
   return (
@@ -39,10 +40,9 @@ export function Hero() {
             </span>
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-background/80">
-            Remmert Montagebau steht für präzise Arbeit, ehrliche Beratung und
-            hochwertige Lösungen aus Metall, Glas und modernen Materialien. Von
-            der ersten Idee bis zur finalen Montage begleiten wir Ihr Projekt
-            persönlich, zuverlässig und mit echter Leidenschaft fürs Handwerk.
+            {SITE.tagline} Präzise Arbeit, ehrliche Beratung und hochwertige
+            Lösungen aus Aluminium, Glas und modernen Materialien – von der
+            ersten Idee bis zur schlüsselfertigen Montage.
           </p>
 
           <div className="mt-8 flex flex-col gap-4 sm:flex-row">

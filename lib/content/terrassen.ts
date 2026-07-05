@@ -1,57 +1,73 @@
-import Link from "next/link";
 import { SITE } from "@/lib/constants";
 
 export const TERRASSEN_BENEFITS = [
   {
-    title: "Mehr Nutzung",
-    text: "Terrasse ganzjährig nutzen – unabhängig von Regen, Wind und Sonne.",
+    title: "Maßanfertigung statt Standard",
+    text: "Jede Überdachung wird individuell geplant – passend zu Haus, Terrasse und Nutzung.",
   },
   {
-    title: "Individuelle Planung",
-    text: "Maßgeschneidert aus Aluminium, Stahl und Glas – passend zu Ihrem Haus.",
+    title: "Aluminium, Glas & Lamellendach",
+    text: "Robuste Materialien, klare Beratung und eine Lösung, die optisch und technisch überzeugt.",
   },
   {
-    title: "Regional & persönlich",
-    text: "Beratung und Montage durch Jan Remmert in Hessisch Oldendorf und Umgebung.",
+    title: "Montage aus einer Hand",
+    text: `Schlüsselfertig umgesetzt von ${SITE.owner} – von der Besichtigung bis zur fertigen Übergabe.`,
   },
 ] as const;
 
 export const TERRASSEN_PROCESS = [
-  "Anfrage per Telefon, WhatsApp oder Formular",
-  "Besichtigung vor Ort",
-  "Planung mit realistischer Einschätzung",
-  "Saubere Montage zum vereinbarten Termin",
+  "Anfrage per Telefon, WhatsApp oder Kontaktformular",
+  "Besichtigung vor Ort und ehrliche Einschätzung",
+  "Individuelles Angebot mit Material- und Dachform-Empfehlung",
+  "Professionelle Montage – termingerecht und sauber",
 ] as const;
 
-export const TERRASSEN_FAQ = [
+export const TERRASSEN_SECTIONS = [
   {
-    question: "Was kostet eine Terrassenüberdachung?",
-    answer:
-      "Die Kosten hängen von Größe, Material und baulicher Situation ab. Nach einer kurzen Abstimmung erhalten Sie eine realistische Einschätzung – unverbindlich und transparent.",
+    id: "aluminium",
+    title: "Terrassenüberdachung aus Aluminium",
+    paragraphs: [
+      "Eine Aluminium-Terrassenüberdachung verbindet filigrane Optik mit hoher Stabilität. Remmert Montagebau plant und montiert Ihre Überdachung in Maßanfertigung – persönlich beraten, ohne anonymen Konfigurator, dafür mit echtem Blick auf Ihr Objekt vor Ort.",
+      "Ob Wandanschluss, Seitenwand, Sichtschutz oder Sonnensegel: Wir stimmen Details gemeinsam ab. Sie entscheiden, ob wir die komplette Montage übernehmen – empfehlenswert für Statik, Entwässerung und langlebige Ergebnisse.",
+    ],
   },
   {
-    question: "In welcher Region arbeitet Remmert Montagebau?",
-    answer:
-      "Wir sind in Hessisch Oldendorf ansässig und betreuen Kunden in Hameln, Rinteln, Bad Münder, Bückeburg, Stadthagen und der umliegenden Region.",
+    id: "dachformen",
+    title: "Dachformen, die zum Haus passen",
+    paragraphs: [
+      "Flachdach oder Pultdach eignen sich ideal für wandgebundene Überdachungen – sauber angebunden, wetterfest und architektonisch stimmig. Freistehende Lösungen setzen wir mit Sattel- oder Pyramidendach um, wenn Statik und Optik es erfordern.",
+      "So entsteht keine Lösung von der Stange, sondern eine Terrassenüberdachung, die Ihr Haus wirklich ergänzt.",
+    ],
   },
   {
-    question: "Wird jede Überdachung individuell geplant?",
-    answer:
-      "Ja. Jede Lösung wird passend zur Immobilie, Nutzung und Optik geplant – keine Standardlösung von der Stange.",
+    id: "langlebigkeit",
+    title: "Langlebig und wartungsarm",
+    paragraphs: [
+      "Aluminium ist leicht, robust und pflegeleicht – ideal für das norddeutsche Klima. Im Vergleich zu Holz wirkt es modern, verzieht sich nicht und braucht keine aufwendige Pflege. Die Investition zahlt sich über Jahre aus: stabil, wetterbeständig und optisch dauerhaft ansprechend.",
+    ],
   },
   {
-    question: "Welche Materialien kommen zum Einsatz?",
-    answer:
-      "Je nach Projekt setzen wir auf Aluminium, Stahl und Glas – oder sinnvolle Kombinationen. Wir beraten ehrlich zu Vor- und Nachteilen.",
+    id: "glas",
+    title: "Mehr Licht mit Glas-Elementen",
+    paragraphs: [
+      "Die Kombination aus Aluminium und Glas bringt Helligkeit auf Ihre Terrasse – bei jedem Wetter. Glasdach Terrassen wirken edel, passen zu moderner Architektur und steigern den Wohnwert spürbar. Wir beraten, welche Verglasung zu Nutzung, Statik und Budget passt.",
+    ],
   },
   {
-    question: "Kann ich Fotos meiner Terrasse schicken?",
-    answer:
-      "Ja. Erste Informationen und Bilder können Sie bequem per WhatsApp oder über das Kontaktformular senden.",
+    id: "genehmigung",
+    title: "Baugenehmigung in Niedersachsen",
+    paragraphs: [
+      "Ob eine Genehmigung nötig ist, hängt von Größe, Abstand, Bebauungsplan und Anbindung ab – in Niedersachsen gelten eigene Regeln. Wir prüfen Ihre Situation und sagen Ihnen klar, was sinnvoll und erforderlich ist.",
+    ],
+    link: { href: "/faq", label: "Antworten in den FAQ" },
   },
   {
-    question: "Wie läuft die Montage ab?",
-    answer:
-      "Nach Ihrer Zusage organisieren wir Material und Termin. Die Montage erfolgt sauber, termingerecht und mit minimalem Aufwand für Sie.",
+    id: "planung",
+    title: "Individuelle Planung – kein Kompromiss",
+    paragraphs: [
+      "Größe, Form, Material und Ausstattung richten wir exakt auf Ihren Bedarf aus – auch bei ungewöhnlichen Grundrissen. So entsteht eine Lösung, die technisch passt, optisch überzeugt und transparent kalkuliert ist. Qualität, die man sieht und der man vertrauen kann.",
+    ],
   },
 ] as const;
+
+export { TERRASSEN_FAQ } from "./faq";

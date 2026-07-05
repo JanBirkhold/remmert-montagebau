@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SITE } from "./constants";
+import { GALLERY_PUBLIC_PATH } from "./gallery";
 
 type PageSEO = {
   title: string;
@@ -13,7 +14,7 @@ export function createMetadata({
   title,
   description,
   path,
-  ogImage = "/images/Jan_Remmert_028-1920w.webp",
+  ogImage = `${GALLERY_PUBLIC_PATH}/montagebau-jan-remmert-028-1920w.webp`,
   noIndex = false,
 }: PageSEO): Metadata {
   const url = `${SITE.url}${path}`;
@@ -56,39 +57,92 @@ export function createMetadata({
 }
 
 export const homeMetadata = createMetadata({
-  title: "Remmert Montagebau | Terrassenüberdachungen & Montagebau",
+  title:
+    "Remmert Montagebau | Terrassenüberdachung & Montagebau in Niedersachsen",
   description:
-    "Remmert Montagebau in Hessisch Oldendorf: Terrassenüberdachungen, Carports, Montagebau und Innenausbau. Persönliche Beratung, saubere Montage, regionale Betreuung.",
+    "Ihr regionaler Fachbetrieb für Terrassenüberdachungen, Kaltwintergärten und Montagebau im Raum Hessisch Oldendorf, Hameln, Schaumburg, Rinteln und Minden. Aluminium, Glas, Carport Montage – schlüsselfertig.",
   path: "/",
 });
 
 export const terrassenMetadata = createMetadata({
-  title: "Terrassenüberdachung Hessisch Oldendorf | Remmert Montagebau",
+  title:
+    "Terrassenüberdachung montieren lassen | Fachbetrieb Remmert Montagebau",
   description:
-    "Hochwertige Terrassenüberdachungen in Hessisch Oldendorf, Hameln und Umgebung. Remmert Montagebau plant und montiert individuelle Lösungen aus Aluminium, Stahl und Glas.",
+    "Terrassenüberdachung Fachbetrieb in Hessisch Oldendorf: Aluminium-Terrassenüberdachung, Glasdach Terrasse, Lamellendach und Kaltwintergarten. Terrassendach Angebot mit Montage – transparent und termingerecht.",
   path: "/terrassenueberdachungen",
-  ogImage: "/images/terra+hx-1920w.webp",
+  ogImage: `${GALLERY_PUBLIC_PATH}/terrassenueberdachungen-jan-remmert-059-1920w.webp`,
 });
 
 export const galerieMetadata = createMetadata({
-  title: "Galerie | Projekte & Referenzen",
+  title: "Referenzen & Galerie | Terrassenüberdachung Projekte",
   description:
-    "Referenzprojekte von Remmert Montagebau: Terrassenüberdachungen, Carports, Montagebau und Innenausbau in Hessisch Oldendorf und Umgebung.",
+    "Referenzprojekte von Remmert Montagebau: Terrassenüberdachungen, Carports, Kaltwintergärten, WPC Terrassen und Montagebau in Hessisch Oldendorf, Hameln und Schaumburg.",
   path: "/galerie",
 });
 
-export const ueberUnsMetadata = createMetadata({
-  title: "Über Uns | Handwerk mit Herz",
+export const faqMetadata = createMetadata({
+  title: "FAQ | Terrassenüberdachung Kosten, Genehmigung & Montage",
   description:
-    "Remmert Montagebau – persönliche Beratung durch den Inhaber Jan Remmert. Maßgeschneiderte Lösungen, saubere Montage und regionale Nähe in Hessisch Oldendorf.",
+    "Antworten zu Terrassenüberdachung Kosten, Baugenehmigung Niedersachsen, Lamellendach vs. Glasdach, Aluminium oder Holz – FAQ von Remmert Montagebau für KI-Suche und Kunden.",
+  path: "/faq",
+});
+
+export const leistungenMetadata = createMetadata({
+  title: "Leistungen | Terrassenüberdachung, Carport, WPC Terrasse",
+  description:
+    "Alle Leistungen von Remmert Montagebau: Terrassenüberdachung, Kaltwintergarten, Carport Montage, Vordach, Zaunbau, WPC Terrasse, Holzterrasse und Montagebau im Weserbergland.",
+  path: "/leistungen",
+});
+
+export const kaltwintergaertenMetadata = createMetadata({
+  title: "Kaltwintergarten & Sommergarten montieren lassen",
+  description:
+    "Kaltwintergarten und Sommergarten vom Handwerker Remmert Montagebau. Glasüberdachungen, Terrassenerweiterung und schlüsselfertige Montage in Niedersachsen.",
+  path: "/kaltwintergaerten",
+  ogImage: `${GALLERY_PUBLIC_PATH}/terrassenueberdachungen-glasdach-1920w.webp`,
+});
+
+export const carportsMetadata = createMetadata({
+  title: "Carport Montage & Vordach Montage",
+  description:
+    "Carport Montage und Vordach Montage von Remmert Montagebau. Metallbau Montage, individuelle Planung und saubere Ausführung in Hameln, Rinteln und Schaumburg.",
+  path: "/carports",
+  ogImage: `${GALLERY_PUBLIC_PATH}/carports-carport-aussenanlage-1920w.webp`,
+});
+
+export const wpcTerrassenMetadata = createMetadata({
+  title: "WPC Terrasse & Holzterrasse | Terrassensanierung",
+  description:
+    "WPC Terrasse, Holzterrasse und Terrassensanierung vom Fachbetrieb Remmert Montagebau. Unterkonstruktion, Verlegung und Montage im Raum Weserbergland.",
+  path: "/wpc-terrassen",
+  ogImage: `${GALLERY_PUBLIC_PATH}/montagebau-holzdeck-naturteich-1920w.webp`,
+});
+
+export function createRegionMetadata(
+  slug: string,
+  title: string,
+  description: string,
+) {
+  return createMetadata({
+    title,
+    description,
+    path: `/regionen/${slug}`,
+    ogImage: `${GALLERY_PUBLIC_PATH}/terrassenueberdachungen-jan-remmert-059-1920w.webp`,
+  });
+}
+
+export const ueberUnsMetadata = createMetadata({
+  title: "Über Uns | Terrassenüberdachung Handwerker Jan Remmert",
+  description:
+    "Remmert Montagebau – Terrassenüberdachung Fachbetrieb mit persönlicher Beratung durch Inhaber Jan Remmert. Maßanfertigung, saubere Montage und regionale Nähe.",
   path: "/ueber-uns",
   ogImage: "/images/inhaber-jan-remmert.webp",
 });
 
 export const kontaktMetadata = createMetadata({
-  title: "Kontakt | Anfrage & Beratung",
+  title: "Kontakt | Terrassenüberdachung Angebot anfragen",
   description:
-    "Kontaktieren Sie Remmert Montagebau für Terrassenüberdachungen und Montagebau. Telefon, WhatsApp, E-Mail oder Kontaktformular – wir melden uns schnellstmöglich.",
+    "Terrassenüberdachung Angebot anfragen bei Remmert Montagebau. Telefon, WhatsApp, E-Mail – kostenlose Erstberatung für Hessisch Oldendorf, Hameln, Rinteln und Umgebung.",
   path: "/kontakt",
 });
 
