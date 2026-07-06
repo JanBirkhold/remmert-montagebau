@@ -69,6 +69,7 @@ export async function sendQuoteEmails(
       <li><strong>Telefon:</strong> ${customer.phone}</li>
       <li><strong>Ort:</strong> ${customer.location}</li>
       <li><strong>Typ:</strong> ${quote.roofTypeLabel}</li>
+      <li><strong>Farbe:</strong> ${quote.frameColorLabel}</li>
       <li><strong>Maße:</strong> ${quote.widthM} m × ${quote.depthM} m</li>
       <li><strong>Brutto:</strong> ${formatCurrency(quote.grossTotal)}</li>
     </ul>

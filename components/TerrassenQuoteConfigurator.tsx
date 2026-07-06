@@ -18,12 +18,14 @@ import {
 } from "@/lib/actions/terrassen-quote";
 import {
   FLOOR_LEVELS,
+  FRAME_COLORS,
   GLAZING_OPTIONS,
   MOUNTING_TYPES,
   QUOTE_EXTRAS,
   ROOF_SHAPES,
   ROOF_TYPES,
   type FloorLevelId,
+  type FrameColorId,
   type GlazingId,
   type MountingTypeId,
   type QuoteExtraId,
@@ -41,6 +43,7 @@ const STEPS = [
   { title: "Typ", shortTitle: "Typ", hint: "Welche Überdachung?" },
   { title: "Montage", shortTitle: "Montage", hint: "Am Haus oder freistehend?" },
   { title: "Maße", shortTitle: "Maße", hint: "Abmessungen" },
+  { title: "Farbe", shortTitle: "Farbe", hint: "Farbe der Konstruktion" },
   { title: "Ausstattung", shortTitle: "Extras", hint: "Details & Extras" },
   { title: "Kontakt", shortTitle: "Kontakt", hint: "Angebot erhalten" },
 ] as const;
@@ -108,6 +111,60 @@ function OptionCard({
   );
 }
 
+function ColorOptionCard({
+  selected,
+  onSelect,
+  label,
+  description,
+  hex,
+  value,
+}: {
+  selected: boolean;
+  onSelect: () => void;
+  label: string;
+  description?: string;
+  hex: string;
+  value: string;
+}) {
+  return (
+    <label
+      className={cn(
+        "flex cursor-pointer items-center gap-3 rounded-xl border-2 p-4 transition-all",
+        selected
+          ? "border-primary bg-primary text-primary-foreground shadow-md"
+          : "border-border bg-background text-foreground hover:border-primary/50",
+      )}
+    >
+      <input
+        type="radio"
+        name="frameColorIdDisplay"
+        value={value}
+        className="sr-only"
+        checked={selected}
+        onChange={onSelect}
+      />
+      <span
+        className="h-10 w-10 shrink-0 rounded-full border-2 border-white/80 shadow-inner"
+        style={{ backgroundColor: hex }}
+        aria-hidden="true"
+      />
+      <span className="min-w-0 flex-1">
+        <span className="block font-semibold">{label}</span>
+        {description && (
+          <span
+            className={cn(
+              "mt-1 block text-sm",
+              selected ? "text-primary-foreground/85" : "text-muted-foreground",
+            )}
+          >
+            {description}
+          </span>
+        )}
+      </span>
+    </label>
+  );
+}
+
 export function TerrassenQuoteConfigurator() {
   const [state, formAction, isPending] = useActionState(
     submitTerrassenQuote,
@@ -126,6 +183,8 @@ export function TerrassenQuoteConfigurator() {
   const [roofShapeId, setRoofShapeId] = useState<RoofShapeId | "">("");
   const [glazingId, setGlazingId] = useState<GlazingId>("standard");
   const [floorLevelId, setFloorLevelId] = useState<FloorLevelId | "">("");
+  const [frameColorId, setFrameColorId] = useState<FrameColorId | "">("");
+  const [consentAccepted, setConsentAccepted] = useState(false);
   const [widthM, setWidthM] = useState("");
   const [depthM, setDepthM] = useState("");
   const [heightM, setHeightM] = useState("");
@@ -165,7 +224,11 @@ export function TerrassenQuoteConfigurator() {
         return false;
       }
     }
-    if (index === 3 && !floorLevelId) {
+    if (index === 3 && !frameColorId) {
+      setStepError("Bitte wählen Sie eine Farbe.");
+      return false;
+    }
+    if (index === 4 && !floorLevelId) {
       setStepError("Bitte wählen Sie das Geschoss / die Lage.");
       return false;
     }
@@ -202,13 +265,28 @@ export function TerrassenQuoteConfigurator() {
   };
 
   const validatePreviewFields = () => {
-    for (let i = 0; i <= 2; i++) {
+    for (let i = 0; i <= 3; i++) {
       if (!validateStep(i)) {
         setStep(i);
         return false;
       }
     }
     return true;
+  };
+
+  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    for (let i = 0; i <= 4; i++) {
+      if (!validateStep(i)) {
+        event.preventDefault();
+        setStep(i);
+        return;
+      }
+    }
+    if (!consentAccepted) {
+      event.preventDefault();
+      setStep(5);
+      setStepError("Bitte bestätigen Sie die Einwilligung zur Angebotserstellung.");
+    }
   };
 
   const handlePreview = () => {
@@ -273,7 +351,7 @@ export function TerrassenQuoteConfigurator() {
         </p>
 
         <ol
-          className="mt-6 grid grid-cols-5 gap-1 sm:gap-2"
+          className="mt-6 grid grid-cols-3 gap-1 sm:grid-cols-6 sm:gap-2"
           aria-label="Fortschritt"
         >
           {STEPS.map((item, index) => (
@@ -302,12 +380,14 @@ export function TerrassenQuoteConfigurator() {
         </ol>
       </div>
 
-      <form ref={formRef} action={formAction} className="bg-background">
+      <form ref={formRef} action={formAction} onSubmit={handleFormSubmit} className="bg-background">
         <input type="hidden" name="roofTypeId" value={roofTypeId} />
         <input type="hidden" name="mountingTypeId" value={mountingTypeId} />
         <input type="hidden" name="roofShapeId" value={roofShapeId} />
         <input type="hidden" name="glazingId" value={glazingId} />
         <input type="hidden" name="floorLevelId" value={floorLevelId} />
+        <input type="hidden" name="frameColorId" value={frameColorId} />
+        <input type="hidden" name="consent" value={consentAccepted ? "accepted" : ""} />
         <input type="hidden" name="widthM" value={widthM} />
         <input type="hidden" name="depthM" value={depthM} />
         <input type="hidden" name="heightM" value={heightM} />
@@ -438,6 +518,22 @@ export function TerrassenQuoteConfigurator() {
           )}
 
           {step === 3 && (
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {FRAME_COLORS.map((color) => (
+                <ColorOptionCard
+                  key={color.id}
+                  value={color.id}
+                  selected={frameColorId === color.id}
+                  onSelect={() => setFrameColorId(color.id)}
+                  label={color.label}
+                  description={color.description}
+                  hex={color.hex}
+                />
+              ))}
+            </div>
+          )}
+
+          {step === 4 && (
             <div className="mt-6 space-y-8">
               <div>
                 <p className="mb-3 font-semibold text-foreground">Geschoss / Lage *</p>
@@ -488,7 +584,7 @@ export function TerrassenQuoteConfigurator() {
             </div>
           )}
 
-          {step === 4 && (
+          {step === 5 && (
             <div className="mt-6 space-y-6">
               <div className="grid gap-6 sm:grid-cols-2">
                 <div className="space-y-2">
@@ -533,7 +629,12 @@ export function TerrassenQuoteConfigurator() {
                 </p>
               </div>
               <div className="flex items-start gap-3 rounded-xl border-2 border-border bg-muted/40 p-4">
-                <Checkbox id="quote-consent" name="consent" value="accepted" />
+                <Checkbox
+                  id="quote-consent"
+                  checked={consentAccepted}
+                  onCheckedChange={(checked) => setConsentAccepted(checked === true)}
+                  aria-required="true"
+                />
                 <Label htmlFor="quote-consent" className="text-sm leading-relaxed text-muted-foreground">
                   Ich möchte ein unverbindliches Angebot erhalten und willige ein, dass
                   meine Daten zur Erstellung und Zusendung verarbeitet werden.{" "}

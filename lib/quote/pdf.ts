@@ -68,6 +68,7 @@ export async function generateQuotePdf(
     `Montage: ${quote.mountingLabel}`,
     `Dachform: ${quote.roofShapeLabel}`,
     `Verglasung: ${quote.glazingLabel}`,
+    `Farbe: ${quote.frameColorLabel}`,
     `Geschoss: ${quote.floorLevelLabel}`,
     `Abmessungen: ${quote.widthM} m × ${quote.depthM} m (${quote.areaSqm} m²)`,
     ...(quote.heightM ? [`Firsthöhe: ca. ${quote.heightM} m`] : []),

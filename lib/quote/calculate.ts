@@ -5,9 +5,11 @@ import {
   getRoofShape,
   getRoofType,
   getFloorLevel,
+  getFrameColor,
   MIN_AREA_SQM,
   VAT_RATE,
   type FloorLevelId,
+  type FrameColorId,
   type GlazingId,
   type MountingTypeId,
   type QuoteExtraId,
@@ -21,6 +23,7 @@ export type QuoteInput = {
   roofShapeId: RoofShapeId;
   glazingId: GlazingId;
   floorLevelId: FloorLevelId;
+  frameColorId: FrameColorId;
   widthM: number;
   depthM: number;
   heightM?: number;
@@ -40,6 +43,7 @@ export type QuoteBreakdown = {
   roofShapeLabel: string;
   glazingLabel: string;
   floorLevelLabel: string;
+  frameColorLabel: string;
   extrasLabels: string[];
   widthM: number;
   depthM: number;
@@ -65,8 +69,9 @@ export function calculateQuote(input: QuoteInput): QuoteBreakdown | null {
   const roofShape = getRoofShape(input.roofShapeId);
   const glazing = getGlazingOption(input.glazingId);
   const floorLevel = getFloorLevel(input.floorLevelId);
+  const frameColor = getFrameColor(input.frameColorId);
 
-  if (!roofType || !mounting || !roofShape || !glazing || !floorLevel) {
+  if (!roofType || !mounting || !roofShape || !glazing || !floorLevel || !frameColor) {
     return null;
   }
 
@@ -98,6 +103,13 @@ export function calculateQuote(input: QuoteInput): QuoteBreakdown | null {
     });
   }
 
+  if (frameColor.surcharge > 0) {
+    lineItems.push({
+      label: `Farbe: ${frameColor.label}`,
+      amount: frameColor.surcharge,
+    });
+  }
+
   if (extrasCost > 0) {
     for (const extraId of input.extras) {
       const extra = getQuoteExtra(extraId);
@@ -122,6 +134,7 @@ export function calculateQuote(input: QuoteInput): QuoteBreakdown | null {
     roofShapeLabel: roofShape.label,
     glazingLabel: glazing.label,
     floorLevelLabel: floorLevel.label,
+    frameColorLabel: frameColor.label,
     extrasLabels: input.extras.flatMap((id) => {
       const label = getQuoteExtra(id)?.label;
       return label ? [label] : [];

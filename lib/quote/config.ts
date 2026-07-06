@@ -97,6 +97,53 @@ export const QUOTE_EXTRAS = [
 
 export type QuoteExtraId = (typeof QUOTE_EXTRAS)[number]["id"];
 
+export const FRAME_COLORS = [
+  {
+    id: "anthrazit",
+    label: "Anthrazit",
+    description: "Klassisch & pflegeleicht",
+    hex: "#3D4348",
+    surcharge: 0,
+  },
+  {
+    id: "weiss",
+    label: "Weiß",
+    description: "Hell & zeitlos",
+    hex: "#F2F2F2",
+    surcharge: 0,
+  },
+  {
+    id: "grau-metallic",
+    label: "Grau metallic",
+    description: "Modern mit Metallic-Effekt",
+    hex: "#8A9098",
+    surcharge: 120,
+  },
+  {
+    id: "schwarz",
+    label: "Schwarz",
+    description: "Edel & kontrastreich",
+    hex: "#1C1C1C",
+    surcharge: 180,
+  },
+  {
+    id: "braun",
+    label: "Holzdekor Braun",
+    description: "Warme Holzoptik",
+    hex: "#6B4A32",
+    surcharge: 240,
+  },
+  {
+    id: "beige",
+    label: "Sand / Beige",
+    description: "Dezent & freundlich",
+    hex: "#C8B89A",
+    surcharge: 120,
+  },
+] as const;
+
+export type FrameColorId = (typeof FRAME_COLORS)[number]["id"];
+
 export const MIN_AREA_SQM = 9;
 export const VAT_RATE = 0.19;
 
@@ -122,4 +169,8 @@ export function getFloorLevel(id: string) {
 
 export function getQuoteExtra(id: string) {
   return QUOTE_EXTRAS.find((extra) => extra.id === id);
+}
+
+export function getFrameColor(id: string) {
+  return FRAME_COLORS.find((color) => color.id === id);
 }
