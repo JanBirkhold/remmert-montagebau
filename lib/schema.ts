@@ -1,5 +1,5 @@
-import { SITE } from "./constants";
-import { GALLERY_PUBLIC_PATH, getFullAddress } from "./gallery";
+import { SITE, SITE_LOGO } from "./constants";
+import { getFullAddress, GALLERY_PUBLIC_PATH } from "./gallery";
 
 type SchemaGraph = Record<string, unknown>[];
 
@@ -11,7 +11,7 @@ function organizationSchema() {
     url: SITE.url,
     logo: {
       "@type": "ImageObject",
-      url: `${SITE.url}${GALLERY_PUBLIC_PATH}/Logo.jpg`,
+      url: `${SITE.url}${SITE_LOGO.src}`,
     },
     sameAs: [SITE.instagram, SITE.facebook],
     contactPoint: {

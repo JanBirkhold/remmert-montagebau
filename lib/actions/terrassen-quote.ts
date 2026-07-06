@@ -46,14 +46,30 @@ function parseOptionalNumber(value: FormDataEntryValue | null) {
   return { value: parsed };
 }
 
-function parseQuoteInput(formData: FormData) {
+function formatQuoteInputErrors(errors: Record<string, string[]>, preview = false) {
+  const hints: string[] = [];
+  if (errors.roofTypeId) hints.push("Typ");
+  if (errors.mountingTypeId || errors.roofShapeId) hints.push("Montage");
+  if (errors.widthM || errors.depthM) hints.push("Maße");
+  if (!preview && errors.floorLevelId) hints.push("Ausstattung");
+
+  if (hints.length > 0) {
+    return `Bitte vervollständigen Sie: ${hints.join(", ")}.`;
+  }
+
+  const firstError = Object.values(errors)[0]?.[0];
+  return firstError ?? "Bitte prüfen Sie Ihre Eingaben.";
+}
+
+function parseQuoteInput(formData: FormData, options?: { preview?: boolean }) {
   const errors: Record<string, string[]> = {};
+  const preview = options?.preview ?? false;
 
   const roofTypeId = formData.get("roofTypeId")?.toString() as RoofTypeId;
   const mountingTypeId = formData.get("mountingTypeId")?.toString() as MountingTypeId;
   const roofShapeId = formData.get("roofShapeId")?.toString() as RoofShapeId;
-  const glazingId = formData.get("glazingId")?.toString() as GlazingId;
-  const floorLevelId = formData.get("floorLevelId")?.toString() as FloorLevelId;
+  const glazingIdRaw = formData.get("glazingId")?.toString() as GlazingId;
+  const floorLevelIdRaw = formData.get("floorLevelId")?.toString() as FloorLevelId;
 
   if (!ROOF_TYPES.some((type) => type.id === roofTypeId)) {
     errors.roofTypeId = ["Bitte wählen Sie einen Terrassentyp."];
@@ -64,10 +80,18 @@ function parseQuoteInput(formData: FormData) {
   if (!ROOF_SHAPES.some((shape) => shape.id === roofShapeId)) {
     errors.roofShapeId = ["Bitte wählen Sie eine Dachform."];
   }
-  if (!GLAZING_OPTIONS.some((option) => option.id === glazingId)) {
-    errors.glazingId = ["Bitte wählen Sie eine Verglasung."];
-  }
-  if (!FLOOR_LEVELS.some((level) => level.id === floorLevelId)) {
+
+  const glazingId = GLAZING_OPTIONS.some((option) => option.id === glazingIdRaw)
+    ? glazingIdRaw
+    : "standard";
+
+  const floorLevelId = FLOOR_LEVELS.some((level) => level.id === floorLevelIdRaw)
+    ? floorLevelIdRaw
+    : preview
+      ? "erdgeschoss"
+      : ("" as FloorLevelId);
+
+  if (!preview && !FLOOR_LEVELS.some((level) => level.id === floorLevelId)) {
     errors.floorLevelId = ["Bitte wählen Sie das Geschoss."];
   }
 
@@ -206,11 +230,11 @@ export async function submitTerrassenQuote(
 export async function previewTerrassenQuotePdf(
   formData: FormData,
 ): Promise<QuoteFormState> {
-  const parsed = parseQuoteInput(formData);
+  const parsed = parseQuoteInput(formData, { preview: true });
   if (Object.keys(parsed.errors).length > 0 || !parsed.input) {
     return {
       success: false,
-      message: "Bitte füllen Sie zuerst Typ, Montage und Abmessungen aus.",
+      message: formatQuoteInputErrors(parsed.errors, true),
       errors: parsed.errors,
     };
   }

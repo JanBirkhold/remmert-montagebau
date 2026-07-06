@@ -1,4 +1,6 @@
 import { Hero } from "@/components/Hero";
+import { StatsSection } from "@/components/StatsSection";
+import { HeroTrustBadges } from "@/components/HeroTrustBadges";
 import { ServiceCards } from "@/components/ServiceCards";
 import { CommunicationSection } from "@/components/CommunicationSection";
 import { ReviewSection } from "@/components/ReviewSection";
@@ -14,7 +16,8 @@ export default function HomePage() {
 
   return (
     <>
-      <Hero />
+      <Hero trustBadges={<HeroTrustBadges />} />
+      <StatsSection />
       <ServiceCards />
       <CommunicationSection />
       <ReviewSection />

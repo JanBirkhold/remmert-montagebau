@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Phone } from "lucide-react";
+import { ArrowRight, Phone, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SITE } from "@/lib/constants";
 
@@ -55,6 +55,21 @@ export function ContactCTA({
                 </a>
               </Button>
             </div>
+            <p className="mt-6 text-sm text-primary-foreground/85">
+              <Star
+                className="mr-1.5 inline h-4 w-4 align-text-bottom text-primary-foreground"
+                aria-hidden="true"
+              />
+              Zufrieden mit unserem Service?{" "}
+              <a
+                href={SITE.googleReviewWrite}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold underline underline-offset-4 hover:text-primary-foreground"
+              >
+                Google-Bewertung abgeben
+              </a>
+            </p>
           </div>
           <div
             className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/5"

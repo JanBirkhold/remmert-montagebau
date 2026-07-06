@@ -38,11 +38,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 
 const STEPS = [
-  { title: "Typ", hint: "Welche Überdachung?" },
-  { title: "Montage", hint: "Am Haus oder freistehend?" },
-  { title: "Maße", hint: "Abmessungen" },
-  { title: "Ausstattung", hint: "Details & Extras" },
-  { title: "Kontakt", hint: "Angebot erhalten" },
+  { title: "Typ", shortTitle: "Typ", hint: "Welche Überdachung?" },
+  { title: "Montage", shortTitle: "Montage", hint: "Am Haus oder freistehend?" },
+  { title: "Maße", shortTitle: "Maße", hint: "Abmessungen" },
+  { title: "Ausstattung", shortTitle: "Extras", hint: "Details & Extras" },
+  { title: "Kontakt", shortTitle: "Kontakt", hint: "Angebot erhalten" },
 ] as const;
 
 const initialState: QuoteFormState = {
@@ -91,8 +91,8 @@ function OptionCard({
         checked={selected}
         onChange={onSelect}
       />
-      <span>
-        <span className="block font-semibold">{title}</span>
+      <span className="min-w-0 flex-1">
+        <span className="block break-words font-semibold">{title}</span>
         {description && (
           <span
             className={cn(
@@ -118,6 +118,8 @@ export function TerrassenQuoteConfigurator() {
   const [step, setStep] = useState(0);
   const [stepError, setStepError] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const [imageCount, setImageCount] = useState(0);
 
   const [roofTypeId, setRoofTypeId] = useState<RoofTypeId | "">("");
   const [mountingTypeId, setMountingTypeId] = useState<MountingTypeId | "">("");
@@ -179,15 +181,50 @@ export function TerrassenQuoteConfigurator() {
     setStep((current) => Math.max(current - 1, 0));
   };
 
+  const goToStep = (target: number) => {
+    if (target === step) return;
+
+    if (target < step) {
+      setStepError("");
+      setStep(target);
+      return;
+    }
+
+    for (let i = step; i < target; i++) {
+      if (!validateStep(i)) {
+        setStep(i);
+        return;
+      }
+    }
+
+    setStepError("");
+    setStep(target);
+  };
+
+  const validatePreviewFields = () => {
+    for (let i = 0; i <= 2; i++) {
+      if (!validateStep(i)) {
+        setStep(i);
+        return false;
+      }
+    }
+    return true;
+  };
+
   const handlePreview = () => {
     if (!formRef.current) return;
-    if (!validateStep(0) || !validateStep(1) || !validateStep(2)) return;
+    setPreviewMessage("");
+    if (!validatePreviewFields()) return;
+
     const formData = new FormData(formRef.current);
     startPreview(async () => {
       const result = await previewTerrassenQuotePdf(formData);
       setPreviewMessage(result.message);
       if (result.success && result.pdfBase64 && result.pdfFilename) {
+        setStepError("");
         downloadPdf(result.pdfBase64, result.pdfFilename);
+      } else {
+        setStepError(result.message);
       }
     });
   };
@@ -222,12 +259,12 @@ export function TerrassenQuoteConfigurator() {
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border-2 border-foreground shadow-xl">
+    <div className="max-w-full overflow-hidden rounded-2xl border-2 border-foreground shadow-xl">
       <div className="bg-foreground px-4 py-5 text-background sm:px-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">
+        <p className="text-xs font-semibold uppercase tracking-wider text-primary sm:tracking-[0.25em]">
           Angebots-Konfigurator
         </p>
-        <h2 className="mt-2 text-2xl font-bold sm:text-3xl">
+        <h2 className="mt-2 text-xl font-bold sm:text-3xl">
           Ein unverbindliches Angebot anfordern
         </h2>
         <p className="mt-2 max-w-2xl text-sm text-background/75 sm:text-base">
@@ -235,20 +272,31 @@ export function TerrassenQuoteConfigurator() {
           schnellstmöglich bei Ihnen. Der Preis wird ausschließlich im PDF ausgewiesen.
         </p>
 
-        <ol className="mt-6 flex gap-2 overflow-x-auto pb-1" aria-label="Fortschritt">
+        <ol
+          className="mt-6 grid grid-cols-5 gap-1 sm:gap-2"
+          aria-label="Fortschritt"
+        >
           {STEPS.map((item, index) => (
-            <li
-              key={item.title}
-              className={cn(
-                "min-w-[88px] flex-1 rounded-lg px-3 py-2 text-center text-xs font-semibold sm:text-sm",
-                index === step
-                  ? "bg-primary text-primary-foreground"
-                  : index < step
-                    ? "bg-background/15 text-background"
-                    : "bg-background/5 text-background/50",
-              )}
-            >
-              <span className="block">{index + 1}. {item.title}</span>
+            <li key={item.title}>
+              <button
+                type="button"
+                onClick={() => goToStep(index)}
+                aria-current={index === step ? "step" : undefined}
+                aria-label={`Schritt ${index + 1}: ${item.title}`}
+                className={cn(
+                  "w-full rounded-lg px-1 py-2 text-center text-[10px] font-semibold leading-tight transition-colors sm:px-3 sm:py-2.5 sm:text-sm",
+                  index === step
+                    ? "bg-primary text-primary-foreground"
+                    : index < step
+                      ? "bg-background/15 text-background hover:bg-background/25"
+                      : "bg-background/5 text-background/50 hover:bg-background/10 hover:text-background/70",
+                )}
+              >
+                <span className="block sm:hidden">{item.shortTitle}</span>
+                <span className="hidden sm:block">
+                  {index + 1}. {item.title}
+                </span>
+              </button>
             </li>
           ))}
         </ol>
@@ -260,9 +308,22 @@ export function TerrassenQuoteConfigurator() {
         <input type="hidden" name="roofShapeId" value={roofShapeId} />
         <input type="hidden" name="glazingId" value={glazingId} />
         <input type="hidden" name="floorLevelId" value={floorLevelId} />
+        <input type="hidden" name="widthM" value={widthM} />
+        <input type="hidden" name="depthM" value={depthM} />
+        <input type="hidden" name="heightM" value={heightM} />
         {extras.map((extra) => (
           <input key={extra} type="hidden" name="extras" value={extra} />
         ))}
+        <input
+          ref={imageInputRef}
+          id="quote-images"
+          name="images"
+          type="file"
+          accept="image/*"
+          multiple
+          className="sr-only"
+          onChange={(event) => setImageCount(event.target.files?.length ?? 0)}
+        />
 
         <div className="px-4 py-8 sm:px-8">
           <p className="text-sm font-medium text-primary">
@@ -270,9 +331,19 @@ export function TerrassenQuoteConfigurator() {
           </p>
           <h3 className="mt-1 text-xl font-bold text-foreground">{STEPS[step].hint}</h3>
 
-          {(stepError || (state.message && !state.success)) && (
-            <p className="mt-4 rounded-lg bg-primary/10 px-4 py-3 text-sm font-medium text-primary" role="alert">
-              {stepError || state.message}
+          {(stepError || previewMessage || (state.message && !state.success)) && (
+            <p
+              className={cn(
+                "mt-4 rounded-lg px-4 py-3 text-sm font-medium",
+                stepError || (state.message && !state.success)
+                  ? "bg-primary/10 text-primary"
+                  : "bg-muted text-muted-foreground",
+              )}
+              role="alert"
+            >
+              {stepError ||
+                (state.message && !state.success ? state.message : "") ||
+                previewMessage}
             </p>
           )}
 
@@ -334,7 +405,6 @@ export function TerrassenQuoteConfigurator() {
                 <Label htmlFor="widthM" className="font-semibold">Breite (m) *</Label>
                 <Input
                   id="widthM"
-                  name="widthM"
                   inputMode="decimal"
                   placeholder="z. B. 4,5"
                   value={widthM}
@@ -346,7 +416,6 @@ export function TerrassenQuoteConfigurator() {
                 <Label htmlFor="depthM" className="font-semibold">Tiefe (m) *</Label>
                 <Input
                   id="depthM"
-                  name="depthM"
                   inputMode="decimal"
                   placeholder="z. B. 3,0"
                   value={depthM}
@@ -358,7 +427,6 @@ export function TerrassenQuoteConfigurator() {
                 <Label htmlFor="heightM" className="font-semibold">Firsthöhe (m)</Label>
                 <Input
                   id="heightM"
-                  name="heightM"
                   inputMode="decimal"
                   placeholder="optional"
                   value={heightM}
@@ -448,17 +516,21 @@ export function TerrassenQuoteConfigurator() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="quote-images">Bilder hochladen (optional)</Label>
-                <div className="relative">
-                  <Input
-                    id="quote-images"
-                    name="images"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="h-11 cursor-pointer border-2 file:mr-4 file:rounded-md file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-foreground"
-                  />
-                  <Upload className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  className="h-12 w-full border-2 text-base sm:w-auto sm:min-w-[260px]"
+                  onClick={() => imageInputRef.current?.click()}
+                >
+                  <Upload aria-hidden="true" />
+                  {imageCount > 0
+                    ? `${imageCount} Bild${imageCount === 1 ? "" : "er"} ausgewählt`
+                    : "Bilder auswählen"}
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  JPG, PNG oder WebP – max. 5 MB pro Bild
+                </p>
               </div>
               <div className="flex items-start gap-3 rounded-xl border-2 border-border bg-muted/40 p-4">
                 <Checkbox id="quote-consent" name="consent" value="accepted" />
@@ -487,13 +559,13 @@ export function TerrassenQuoteConfigurator() {
             size="lg"
             onClick={goBack}
             disabled={step === 0 || isPending}
-            className="border-2"
+            className="w-full border-2 sm:w-auto"
           >
             <ArrowLeft aria-hidden="true" />
             Zurück
           </Button>
 
-          <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
             {step === STEPS.length - 1 && (
               <Button
                 type="button"
@@ -501,28 +573,35 @@ export function TerrassenQuoteConfigurator() {
                 size="lg"
                 disabled={previewPending || isPending}
                 onClick={handlePreview}
-                className="border-2"
+                className="w-full border-2 whitespace-normal sm:w-auto sm:whitespace-nowrap"
               >
                 <FileText aria-hidden="true" />
                 {previewPending ? "PDF wird erstellt…" : "Test-PDF (Vorschau)"}
               </Button>
             )}
             {step < STEPS.length - 1 ? (
-              <Button type="button" size="lg" onClick={goNext} className="min-w-[140px] font-semibold">
+              <Button
+                type="button"
+                size="lg"
+                onClick={goNext}
+                className="w-full font-semibold sm:w-auto sm:min-w-[140px]"
+              >
                 Weiter
                 <ArrowRight aria-hidden="true" />
               </Button>
             ) : (
-              <Button type="submit" size="lg" disabled={isPending} className="min-w-[200px] font-semibold">
+              <Button
+                type="submit"
+                size="lg"
+                disabled={isPending}
+                className="w-full font-semibold sm:w-auto sm:min-w-[200px]"
+              >
                 {isPending ? "Wird erstellt…" : "Angebot anfordern"}
               </Button>
             )}
           </div>
         </div>
 
-        {previewMessage && !state.success && step === STEPS.length - 1 && (
-          <p className="px-8 pb-4 text-sm text-muted-foreground">{previewMessage}</p>
-        )}
       </form>
     </div>
   );

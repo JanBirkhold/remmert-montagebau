@@ -29,10 +29,13 @@
 
   html {
     scroll-behavior: smooth;
+    overflow-x: clip;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
+    overflow-x: clip;
+    max-width: 100%;
   }
 
   h1,

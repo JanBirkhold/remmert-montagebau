@@ -65,7 +65,18 @@ export const GALLERY_IMAGE_ALT: Record<string, string> = {
     "Carport-Lösung und Außenanlage von Remmert Montagebau",
 };
 
-export const GALLERY_EXCLUDED_FILES = new Set(["Logo.jpg", ".DS_Store"]);
+export const GALLERY_EXCLUDED_FILES = new Set([
+  "Logo.jpg",
+  "Logo.png",
+  "logo.png",
+  "logo_black.png",
+  "logo-black.png",
+  "logo_weiß.png",
+  "logo-weiss.png",
+  "logo_weiss.png",
+  "favicon.png",
+  ".DS_Store",
+]);
 
 export const TERRASSEN_HERO_IMAGE = {
   src: `${GALLERY_PUBLIC_PATH}/terrassenueberdachungen-jan-remmert-059-1920w.webp`,

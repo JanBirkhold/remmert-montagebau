@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
 import { ExternalLink, Quote, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,8 +21,8 @@ export function ReviewSection() {
             Das sagen unsere Kunden
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Bewertungen geben Interessenten einen ehrlichen Eindruck unserer
-            Arbeit. Weitere Rezensionen finden Sie direkt bei Google.
+            Zufrieden mit unserer Arbeit? Wir freuen uns über Ihre ehrliche
+            Google-Bewertung – das hilft anderen bei der Entscheidung.
           </p>
         </div>
 
@@ -63,17 +62,51 @@ export function ReviewSection() {
           ))}
         </div>
 
-        <div className="mt-10 text-center">
-          <Button asChild variant="outline" size="lg">
-            <a
-              href={SITE.googleReviews}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Google-Bewertungen ansehen
-              <ExternalLink className="h-4 w-4" aria-hidden="true" />
-            </a>
-          </Button>
+        <div className="mx-auto mt-10 max-w-lg rounded-2xl border-2 border-primary/20 bg-card px-6 py-8 shadow-sm sm:px-8">
+          <div className="flex flex-col items-center text-center">
+            <div className="mb-4 flex gap-1" aria-hidden="true">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star key={i} className="h-5 w-5 fill-primary text-primary" />
+              ))}
+            </div>
+            <h3 className="text-xl font-bold text-foreground">
+              Zufrieden? Bewertung abgeben
+            </h3>
+            <p className="mt-2 max-w-md text-sm text-muted-foreground">
+              Ihre Erfahrung mit Remmert Montagebau – in wenigen Klicks bei Google.
+            </p>
+            <div className="mt-6 flex w-full flex-col gap-3 sm:max-w-md">
+              <Button
+                asChild
+                size="lg"
+                className="h-auto min-h-12 w-full whitespace-normal px-4 py-3 text-center"
+              >
+                <a
+                  href={SITE.googleReviewWrite}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Star aria-hidden="true" className="shrink-0" />
+                  Google-Bewertung abgeben
+                </a>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="h-auto min-h-12 w-full whitespace-normal px-4 py-3 text-center"
+              >
+                <a
+                  href={SITE.googleReviews}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Bewertungen ansehen
+                  <ExternalLink aria-hidden="true" className="shrink-0" />
+                </a>
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </section>

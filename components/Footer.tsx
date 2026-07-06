@@ -11,7 +11,7 @@ import {
   Phone,
   Star,
 } from "lucide-react";
-import { LEGAL_ITEMS, NAV_ITEMS, SITE } from "@/lib/constants";
+import { LEGAL_ITEMS, NAV_ITEMS, SITE, SITE_LOGO } from "@/lib/constants";
 
 function FooterLink({
   href,
@@ -45,13 +45,17 @@ export function Footer() {
     <footer className="border-t border-border bg-foreground text-background">
       <div className="container-narrow section-padding grid gap-10 md:grid-cols-2 xl:grid-cols-12 xl:gap-8">
         <div className="space-y-5 xl:col-span-4">
-          <Link href="/" aria-label="Remmert Montagebau – Startseite">
+          <Link
+            href="/"
+            aria-label="Remmert Montagebau – Startseite"
+            className="inline-flex rounded-xl bg-white px-5 py-3 shadow-sm"
+          >
             <Image
-              src="/images/gallery/Logo.jpg"
+              src={SITE_LOGO.src}
               alt="Remmert Montagebau Logo"
-              width={180}
-              height={54}
-              className="h-11 w-auto object-contain"
+              width={SITE_LOGO.width}
+              height={SITE_LOGO.height}
+              className="h-[4.75rem] w-auto max-w-[280px] object-contain sm:h-24 sm:max-w-[320px]"
             />
           </Link>
           <p className="max-w-sm text-sm leading-relaxed text-background/70">
@@ -204,13 +208,13 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href={SITE.googleReviews}
+                  href={SITE.googleReviewWrite}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-sm text-background/70 transition-colors hover:text-background"
                 >
                   <Star className="h-4 w-4 text-primary" aria-hidden="true" />
-                  Google Bewertungen
+                  Google-Bewertung abgeben
                 </a>
               </li>
             </ul>

@@ -22,16 +22,10 @@ export async function generateQuotePdf(
   const fontBold = await pdf.embedFont(StandardFonts.HelveticaBold);
   const { width, height } = page.getSize();
 
-  const logoPath = path.join(
-    process.cwd(),
-    "public",
-    "images",
-    "gallery",
-    "Logo.jpg",
-  );
+  const logoPath = path.join(process.cwd(), "public", "images", "logo-black.png");
   const logoBytes = readFileSync(logoPath);
-  const logo = await pdf.embedJpg(logoBytes);
-  const logoDims = logo.scale(0.18);
+  const logo = await pdf.embedPng(logoBytes);
+  const logoDims = logo.scale(0.35);
   page.drawImage(logo, {
     x: width - logoDims.width - 40,
     y: height - logoDims.height - 36,

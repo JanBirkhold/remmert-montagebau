@@ -10,8 +10,13 @@ export const SITE = {
   instagram: "https://www.instagram.com/remmert_montagebau/",
   facebook:
     "https://www.facebook.com/people/Remmert-Montagebau/100063594130194/",
+  googleMapsUrl:
+    "https://www.google.com/maps/search/?api=1&query=Remmert+Montagebau,Röthstraße+8,31840+Hessisch+Oldendorf",
+  /** Direktlink zum Bewertungsformular – Place-ID in Google Business ersetzen, falls vorhanden */
+  googleReviewWrite:
+    "https://www.google.com/maps/search/?api=1&query=Remmert+Montagebau,Röthstraße+8,31840+Hessisch+Oldendorf",
   googleReviews:
-    "https://www.google.com/search?q=Remmert+Montagebau+Rezensionen",
+    "https://www.google.com/maps/search/?api=1&query=Remmert+Montagebau,Röthstraße+8,31840+Hessisch+Oldendorf",
   address: {
     street: "Röthstraße 8",
     city: "Hessisch Oldendorf",
@@ -47,6 +52,42 @@ export const SITE = {
     "Termingerechte Projektabwicklung",
     "Hochwertige Materialien & saubere Montage",
   ],
+} as const;
+
+export const COMPANY_STATS = [
+  {
+    value: 548,
+    label: "Erfolgreich abgeschlossene Projekte",
+    decimals: 0,
+    suffix: "+",
+    featured: true,
+  },
+  {
+    value: 18,
+    label: "Jahre Erfahrung",
+    decimals: 0,
+    suffix: "",
+  },
+  {
+    value: 2016,
+    label: "Gründung seit",
+    decimals: 0,
+    suffix: "",
+  },
+  {
+    value: 4.6,
+    label: "Sterne bei Google",
+    detail: "aus 10 Bewertungen",
+    decimals: 1,
+    suffix: "",
+    showStars: true,
+  },
+] as const;
+
+export const SITE_LOGO = {
+  src: "/images/logo-black.png",
+  width: 480,
+  height: 155,
 } as const;
 
 export const NAV_ITEMS = [

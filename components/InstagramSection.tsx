@@ -55,15 +55,16 @@ export function InstagramSection({ images }: InstagramSectionProps) {
           ))}
         </div>
 
-        <div className="mt-10 text-center">
-          <Button asChild size="lg">
+        <div className="mt-10 flex justify-center px-2">
+          <Button asChild size="lg" className="h-auto max-w-full px-4 py-3 sm:h-12 sm:px-8">
             <a
               href={SITE.instagram}
               target="_blank"
               rel="noopener noreferrer"
+              className="whitespace-normal text-center leading-snug sm:whitespace-nowrap"
             >
-              <Instagram aria-hidden="true" />
-              Remmert Montagebau auf Instagram folgen
+              <Instagram aria-hidden="true" className="shrink-0" />
+              Jan Remmert auf Instagram folgen
             </a>
           </Button>
         </div>

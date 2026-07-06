@@ -27,10 +27,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="de">
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} font-sans antialiased overflow-x-clip`}>
         <JsonLd data={createWebsiteSchema()} />
         <Header />
-        <main id="main-content">{children}</main>
+        <main id="main-content" className="max-w-full overflow-x-clip">
+          {children}
+        </main>
         <Footer />
       </body>
     </html>

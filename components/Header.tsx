@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { NAV_ITEMS } from "@/lib/constants";
+import { NAV_ITEMS, SITE, SITE_LOGO } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 export function Header() {
@@ -45,11 +45,11 @@ export function Header() {
             aria-label="Remmert Montagebau – Startseite"
           >
             <Image
-              src="/images/gallery/Logo.jpg"
+              src={SITE_LOGO.src}
               alt="Remmert Montagebau Logo"
-              width={160}
-              height={48}
-              className="h-10 w-auto object-contain sm:h-12"
+              width={SITE_LOGO.width}
+              height={SITE_LOGO.height}
+              className="h-11 w-auto max-w-[220px] object-contain sm:h-14 sm:max-w-[260px]"
               priority
             />
           </Link>
@@ -104,10 +104,11 @@ export function Header() {
       <div
         id="mobile-nav"
         className={cn(
-          "fixed inset-y-0 right-0 top-20 z-[70] flex w-full flex-col bg-background shadow-2xl transition-transform duration-300 sm:max-w-sm lg:hidden",
-          isOpen ? "translate-x-0" : "translate-x-full pointer-events-none",
+          "fixed inset-y-0 right-0 top-20 z-[70] flex w-full max-w-full flex-col bg-background shadow-2xl transition-transform duration-300 sm:max-w-sm lg:hidden",
+          isOpen ? "translate-x-0" : "pointer-events-none translate-x-full",
         )}
         aria-hidden={!isOpen}
+        inert={!isOpen ? true : undefined}
       >
         <nav
           className="flex flex-1 flex-col gap-1 overflow-y-auto px-4 py-6"
