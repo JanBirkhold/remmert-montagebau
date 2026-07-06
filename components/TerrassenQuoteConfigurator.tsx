@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -12,10 +12,11 @@ import {
   Upload,
 } from "lucide-react";
 import {
-  previewTerrassenQuotePdf,
-  submitTerrassenQuote,
-  type QuoteFormState,
-} from "@/lib/actions/terrassen-quote";
+  createPdfObjectUrl,
+  fetchAndOpenQuotePdf,
+  isMobilePdfDevice,
+} from "@/lib/quote/download-client";
+import { type QuoteFormState } from "@/lib/quote/types";
 import {
   FLOOR_LEVELS,
   FRAME_COLORS,
@@ -53,11 +54,28 @@ const initialState: QuoteFormState = {
   message: "",
 };
 
-function downloadPdf(base64: string, filename: string) {
-  const link = document.createElement("a");
-  link.href = `data:application/pdf;base64,${base64}`;
-  link.download = filename;
-  link.click();
+function PdfOpenLink({
+  href,
+  filename,
+  className,
+  children,
+}: {
+  href: string;
+  filename: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      download={isMobilePdfDevice() ? undefined : filename}
+      className={className}
+    >
+      {children}
+    </a>
+  );
 }
 
 function OptionCard({
@@ -166,11 +184,10 @@ function ColorOptionCard({
 }
 
 export function TerrassenQuoteConfigurator() {
-  const [state, formAction, isPending] = useActionState(
-    submitTerrassenQuote,
-    initialState,
-  );
-  const [previewPending, startPreview] = useTransition();
+  const [state, setState] = useState<QuoteFormState>(initialState);
+  const [isPending, setIsPending] = useState(false);
+  const [previewPending, setPreviewPending] = useState(false);
+  const [pdfObjectUrl, setPdfObjectUrl] = useState<string | null>(null);
   const [previewMessage, setPreviewMessage] = useState("");
   const [step, setStep] = useState(0);
   const [stepError, setStepError] = useState("");
@@ -188,7 +205,24 @@ export function TerrassenQuoteConfigurator() {
   const [widthM, setWidthM] = useState("");
   const [depthM, setDepthM] = useState("");
   const [heightM, setHeightM] = useState("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [location, setLocation] = useState("");
+  const [message, setMessage] = useState("");
   const [extras, setExtras] = useState<QuoteExtraId[]>([]);
+
+  useEffect(() => {
+    return () => {
+      if (pdfObjectUrl) URL.revokeObjectURL(pdfObjectUrl);
+    };
+  }, [pdfObjectUrl]);
+
+  useEffect(() => {
+    if (state.success && state.pdfBase64 && !pdfObjectUrl) {
+      setPdfObjectUrl(createPdfObjectUrl(state.pdfBase64));
+    }
+  }, [state.success, state.pdfBase64, pdfObjectUrl]);
 
   const toggleExtra = (id: QuoteExtraId) => {
     setExtras((current) =>
@@ -274,40 +308,77 @@ export function TerrassenQuoteConfigurator() {
     return true;
   };
 
-  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setStepError("");
+    setPreviewMessage("");
+
     for (let i = 0; i <= 4; i++) {
       if (!validateStep(i)) {
-        event.preventDefault();
         setStep(i);
         return;
       }
     }
     if (!consentAccepted) {
-      event.preventDefault();
       setStep(5);
       setStepError("Bitte bestätigen Sie die Einwilligung zur Angebotserstellung.");
+      return;
+    }
+
+    if (!formRef.current) return;
+
+    setIsPending(true);
+    try {
+      const formData = new FormData(formRef.current);
+      const response = await fetch("/api/quote/submit", {
+        method: "POST",
+        body: formData,
+      });
+      const result = (await response.json()) as QuoteFormState;
+      setState(result);
+
+      if (result.success && result.pdfBase64) {
+        setPdfObjectUrl(createPdfObjectUrl(result.pdfBase64));
+      } else if (!result.success) {
+        setStepError(result.message);
+        if (result.errors?.consent) setStep(5);
+      }
+    } catch {
+      setStepError(
+        "Das Angebot konnte nicht gesendet werden. Bitte prüfen Sie Ihre Internetverbindung.",
+      );
+    } finally {
+      setIsPending(false);
     }
   };
 
-  const handlePreview = () => {
+  const handlePreview = async () => {
     if (!formRef.current) return;
     setPreviewMessage("");
+    setStepError("");
     if (!validatePreviewFields()) return;
 
-    const formData = new FormData(formRef.current);
-    startPreview(async () => {
-      const result = await previewTerrassenQuotePdf(formData);
-      setPreviewMessage(result.message);
-      if (result.success && result.pdfBase64 && result.pdfFilename) {
-        setStepError("");
-        downloadPdf(result.pdfBase64, result.pdfFilename);
-      } else {
-        setStepError(result.message);
-      }
-    });
+    setPreviewPending(true);
+    try {
+      const formData = new FormData(formRef.current);
+      const filename = await fetchAndOpenQuotePdf(
+        "/api/quote/preview",
+        formData,
+        "Test-Angebot.pdf",
+      );
+      setPreviewMessage(
+        `Test-PDF „${filename}“ geöffnet. Auf dem iPhone/iPad erscheint es in einem neuen Tab.`,
+      );
+    } catch (error) {
+      setStepError(
+        error instanceof Error ? error.message : "Test-PDF konnte nicht erstellt werden.",
+      );
+    } finally {
+      setPreviewPending(false);
+    }
   };
 
-  if (state.success && state.pdfBase64 && state.pdfFilename) {
+  if (state.success && state.pdfFilename && pdfObjectUrl) {
     return (
       <div className="overflow-hidden rounded-2xl border-2 border-foreground shadow-xl">
         <div className="bg-primary px-6 py-5 text-primary-foreground">
@@ -316,15 +387,19 @@ export function TerrassenQuoteConfigurator() {
         <div className="bg-background px-6 py-10 text-center sm:px-10">
           <CheckCircle2 className="mx-auto h-14 w-14 text-primary" aria-hidden="true" />
           <p className="mx-auto mt-4 max-w-lg text-muted-foreground">{state.message}</p>
-          <Button
-            type="button"
-            size="lg"
-            className="mt-8"
-            onClick={() => downloadPdf(state.pdfBase64!, state.pdfFilename!)}
+          <PdfOpenLink
+            href={pdfObjectUrl}
+            filename={state.pdfFilename}
+            className="mt-8 inline-flex h-11 items-center justify-center gap-2 rounded-md bg-primary px-8 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            <Download aria-hidden="true" />
-            Angebot als PDF herunterladen
-          </Button>
+            <Download aria-hidden="true" className="h-4 w-4" />
+            PDF öffnen
+          </PdfOpenLink>
+          <p className="mt-3 text-xs text-muted-foreground">
+            {isMobilePdfDevice()
+              ? "Tippen Sie auf „PDF öffnen“. Auf iPhone/iPad öffnet sich der PDF-Viewer – dort können Sie speichern oder teilen."
+              : "Das PDF öffnet sich in einem neuen Tab und kann dort gespeichert werden."}
+          </p>
           <p className="mt-6 inline-flex items-center gap-2 text-sm text-muted-foreground">
             <Mail className="h-4 w-4 text-primary" aria-hidden="true" />
             {state.emailSent
@@ -380,7 +455,7 @@ export function TerrassenQuoteConfigurator() {
         </ol>
       </div>
 
-      <form ref={formRef} action={formAction} onSubmit={handleFormSubmit} className="bg-background">
+      <form ref={formRef} onSubmit={handleFormSubmit} className="bg-background">
         <input type="hidden" name="roofTypeId" value={roofTypeId} />
         <input type="hidden" name="mountingTypeId" value={mountingTypeId} />
         <input type="hidden" name="roofShapeId" value={roofShapeId} />
@@ -391,6 +466,11 @@ export function TerrassenQuoteConfigurator() {
         <input type="hidden" name="widthM" value={widthM} />
         <input type="hidden" name="depthM" value={depthM} />
         <input type="hidden" name="heightM" value={heightM} />
+        <input type="hidden" name="name" value={name} />
+        <input type="hidden" name="phone" value={phone} />
+        <input type="hidden" name="email" value={email} />
+        <input type="hidden" name="location" value={location} />
+        <input type="hidden" name="message" value={message} />
         {extras.map((extra) => (
           <input key={extra} type="hidden" name="extras" value={extra} />
         ))}
@@ -589,26 +669,58 @@ export function TerrassenQuoteConfigurator() {
               <div className="grid gap-6 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="quote-name">Name *</Label>
-                  <Input id="quote-name" name="name" autoComplete="name" className="h-11 border-2" />
+                  <Input
+                    id="quote-name"
+                    autoComplete="name"
+                    className="h-11 border-2"
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="quote-phone">Telefon *</Label>
-                  <Input id="quote-phone" name="phone" type="tel" autoComplete="tel" className="h-11 border-2" />
+                  <Input
+                    id="quote-phone"
+                    type="tel"
+                    autoComplete="tel"
+                    className="h-11 border-2"
+                    value={phone}
+                    onChange={(event) => setPhone(event.target.value)}
+                  />
                 </div>
               </div>
               <div className="grid gap-6 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="quote-email">E-Mail *</Label>
-                  <Input id="quote-email" name="email" type="email" autoComplete="email" className="h-11 border-2" />
+                  <Input
+                    id="quote-email"
+                    type="email"
+                    autoComplete="email"
+                    className="h-11 border-2"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="quote-location">Ort *</Label>
-                  <Input id="quote-location" name="location" placeholder="z. B. Hameln" className="h-11 border-2" />
+                  <Input
+                    id="quote-location"
+                    placeholder="z. B. Hameln"
+                    className="h-11 border-2"
+                    value={location}
+                    onChange={(event) => setLocation(event.target.value)}
+                  />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="quote-message">Anmerkungen (optional)</Label>
-                <Textarea id="quote-message" name="message" rows={3} className="border-2" />
+                <Textarea
+                  id="quote-message"
+                  rows={3}
+                  className="border-2"
+                  value={message}
+                  onChange={(event) => setMessage(event.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="quote-images">Bilder hochladen (optional)</Label>
